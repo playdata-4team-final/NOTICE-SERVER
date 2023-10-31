@@ -1,6 +1,6 @@
 package com.example.notice.global.util;
 
-import com.example.lms.domain.response.LmsResponse;
+import com.example.notice.global.domain.response.LmsResponse;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;

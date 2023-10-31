@@ -3,12 +3,10 @@ package com.example.notice.global.exception;
 import lombok.Getter;
 
 @Getter
-public class ClientException extends RuntimeException {
-
+public class DuplicateException extends RuntimeException{
     private String errorMsg;
 
-    public ClientException(String s) {
-        super(s);
+    public DuplicateException(String s) {
         this.errorMsg = s;
     }
 

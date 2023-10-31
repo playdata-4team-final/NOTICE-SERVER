@@ -1,6 +1,6 @@
 package com.example.notice.global.responsehandler;
 
-import com.example.lms.global.util.ResponseUtil;
+import com.example.notice.global.util.ResponseUtil;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
