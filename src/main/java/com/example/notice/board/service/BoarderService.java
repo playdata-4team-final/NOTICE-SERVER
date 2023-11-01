@@ -1,5 +1,7 @@
 package com.example.notice.board.service;
 
+import com.example.notice.admin.dto.AdminDto;
+import com.example.notice.board.entity.AdminBoard;
 import com.example.notice.board.repository.AdminBoardRepository;
 import com.example.notice.board.repository.ClassBoardRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,21 +17,34 @@ public class BoarderService {
     private final ClassBoardRepository classBoardRepository;
 
     //댓글 작성
-    private void writeMiniComments(){}
+    private void writeMiniComments(){
+
+
+    }
 
     //파일 업로드
-    private void uploadFile(){}
+    private void uploadFile(){
 
-    //글 작성
-    private void writeText(){}
+    }
+
+    //공지사항 생성
+    private AdminBoard writeText(AdminDto adminDto){
+        AdminBoard save = adminBoardRepository.save(adminDto.toEntity());
+        return save;
+    }
 
     //글 삭제
     private void deleteText(){}
 
+
     //댓글 삭제
-    private void deleteMiniComments(){}
+    private void deleteMiniComments(){
+
+    }
 
     //파일 삭제
-    private void deleteFile(){}
+    private void deleteFile(){
+
+    }
 
 }
