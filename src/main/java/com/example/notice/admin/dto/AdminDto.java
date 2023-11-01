@@ -1,6 +1,6 @@
 package com.example.notice.admin.dto;
 
-import com.example.notice.board.entity.AdminBoard;
+import com.example.notice.board.domain.entity.AdminBoard;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

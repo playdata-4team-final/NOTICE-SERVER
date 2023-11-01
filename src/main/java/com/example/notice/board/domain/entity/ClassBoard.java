@@ -1,4 +1,4 @@
-package com.example.notice.board.entity;
+package com.example.notice.board.domain.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
