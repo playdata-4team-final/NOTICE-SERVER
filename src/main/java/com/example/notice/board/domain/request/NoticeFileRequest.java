@@ -7,8 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class AdminFileRequest {
+public class NoticeFileRequest {
 
     private String adminId;
+    private Long noticeId;
     private String fileUrl;
 }

@@ -11,17 +11,22 @@ import java.time.LocalDateTime;
 @Getter
 @RequiredArgsConstructor
 @Builder
-public class ClassBoard {
+public class NoticeComment {
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
     private String userId;
-    private String email;
-    private String title;
+    private String comments;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
-    private String fileUrl;
-    private Long lectureUrl;
+    private Long adminBoardId;
+
+    public void deleteNoticeComment(){
+        this.comments = "삭제된 게시물입니다.";
+    };
+
+    public void changeNoticeComment(String comments){
+        this.comments = comments;
+    };
 
 }
