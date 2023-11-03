@@ -10,13 +10,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-public class NoticeDeleteRequest {
+public class NoticeGetRequest {
     private Long id;
-    private String adminId;
+
     public Notice toEntity() {
         return Notice.builder()
                 .id(id)
-                .userId(adminId)
                 .build();
     }
 }
