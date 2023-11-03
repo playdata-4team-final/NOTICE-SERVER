@@ -12,31 +12,31 @@ import java.time.LocalDateTime;
 @Builder
 public class NoticeDto {
 
-    private String id;
+    private String userId;
     private Long noticeId;
     private String email;
     private String title;
     private LocalDateTime createAt;
-    private LocalDateTime updateTime;
+    private LocalDateTime updateAt;
     private String fileUrl;
 
-    public NoticeDto(String id, Long noticeId, String email, String title, LocalDateTime createAt, LocalDateTime updateTime, String fileUrl) {
-        this.id = id;
+    public NoticeDto(String userId, Long noticeId, String email, String title, LocalDateTime createAt, LocalDateTime updateAt, String fileUrl) {
+        this.userId = userId;
         this.noticeId = noticeId;
         this.email = email;
         this.title = title;
         this.createAt = createAt;
-        this.updateTime = updateTime;
+        this.updateAt = updateAt;
         this.fileUrl = fileUrl;
     }
 
     public NoticeDto(Notice notice) {
-        this.id = notice.getAdminId();
+        this.userId = notice.getAdminId();
         this.noticeId = notice.getId();
         this.email = notice.getEmail();
         this.title = notice.getTitle();
         this.createAt = notice.getCreateAt();
-        this.updateTime = notice.getUpdateTime();
+        this.updateAt = notice.getUpdateAt();
         this.fileUrl = notice.getFileUrl();
 
     }
@@ -50,7 +50,7 @@ public class NoticeDto {
     }
 
     public void changeUpdateTime(){
-        this.updateTime = LocalDateTime.now();
+        this.updateAt = LocalDateTime.now();
     }
 
 }
