@@ -39,6 +39,19 @@ public class CLassDto {
         this.fileUrl = classBoard.getFileUrl();
     }
 
+    public ClassBoard toEntity(){
+        return ClassBoard
+                .builder()
+                .userId(userId)
+                .id(classId)
+                .email(email)
+                .title(title)
+                .createAt(createAt)
+                .updateAt(updateTime)
+                .fileUrl(fileUrl)
+                .build();
+    }
+
     public void changeFileUrl(String fileUrl){
         this.fileUrl = fileUrl;
     }

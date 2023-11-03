@@ -1,7 +1,6 @@
 package com.example.notice.board.service;
 
-import com.example.notice.admin.dto.CLassDto;
-import com.example.notice.admin.dto.NoticeDto;
+import com.example.notice.admin.dto.*;
 import com.example.notice.board.domain.entity.*;
 import com.example.notice.board.domain.request.*;
 import com.example.notice.board.domain.response.*;
@@ -23,6 +22,14 @@ public class BoardService {
     private final NoticeCommentRepository noticeCommentRepository;
     private final ClassCommentRepository classCommentRepository;
 
+    //공지사항 보기
+    @Transactional
+    public NoticeRes getNotice(NoticeGetRequest noticeGetRequest){
+        Notice notice = adminBoardRepository.findById(noticeGetRequest.getId()).get();
+        NoticeRes noticeRes = new NoticeRes(notice);
+        return  noticeRes;
+    }
+
     //공지사항 생성
     @Transactional
     public NoticeRes writeNotice(NoticeCreateRequest noticeCreateRequest){
@@ -34,10 +41,19 @@ public class BoardService {
     //공지사항 삭제
     @Transactional
     public String deleteNotice(NoticeDeleteRequest noticedeleteRequest){
-        NoticeDto noticeDto = adminBoardRepository.findByNoticeId(noticedeleteRequest.getId()).get();
-        adminBoardRepository.deleteByNoticeId(noticeDto.getNoticeId());
+        Notice notice = adminBoardRepository.findById(noticedeleteRequest.getId()).get();
+        adminBoardRepository.deleteByNoticeId(notice.getId());
         return "Success Delete!";
     }
+
+    //공지사항 파일 보기
+    @Transactional
+    public NoticeRes getNoticeFile(NoticeGetRequest noticeFileRequest){
+        NoticeDto noticeDto = adminBoardRepository.findFileUrlByNoticeId(noticeFileRequest.getId()).get();
+        NoticeRes noticeRes = new NoticeRes(noticeDto.toEntity());
+        return noticeRes;
+    }
+
 
     //공지사항 파일 업로드
     @Transactional
@@ -51,6 +67,14 @@ public class BoardService {
     public String deleteNoticeFile(NoticeFileRequest noticeFileRequest){
         deleteNoticeFileUrl(noticeFileRequest);
         return "Success Delete!";
+    }
+
+    //공지사항 댓글 보기
+    @Transactional
+    public NoticeCommentRes getNoticeComments(NoticeGetRequest noticeCommentRequest){
+        NoticeCommentDto noticeCommentDto = noticeCommentRepository.findByNoticeId(noticeCommentRequest.getId()).get();
+        NoticeCommentRes noticeCommentRes = new NoticeCommentRes(noticeCommentDto.toEntity());
+        return noticeCommentRes;
     }
 
     //공지사항 댓글 작성
@@ -75,6 +99,14 @@ public class BoardService {
         return "Success Update!";
     }
 
+    //공지 사항 대댓글 보기
+    @Transactional
+    public NoticeMiniCommentRes getNoticeMiniComments(NoticeGetMiniCommentRequest noticeGetMiniCommentRequest){
+        NoticeMiniCommentDto noticeMiniCommentDto = noticeMiniCommentRepository.findByNoticeIdandComAndNoticeCommentId(noticeGetMiniCommentRequest.getNoticeId(), noticeGetMiniCommentRequest.getCommentId()).get();
+        NoticeMiniCommentRes noticeMiniCommentRes = new NoticeMiniCommentRes(noticeMiniCommentDto.toEntity());
+        return noticeMiniCommentRes;
+    }
+
     //공지 사항 대댓글 작성
     @Transactional
     public NoticeMiniCommentRes writeNoticeMiniComments(NoticeMiniCommentRequest noticeMiniCommentRequest){
@@ -97,6 +129,14 @@ public class BoardService {
         return "Success Update!";
     }
 
+    //강의 게시판 보기
+    @Transactional
+    public ClassBoardRes getClass(ClassGetRequest classgetRequest){
+        ClassBoard classBoard = classBoardRepository.findById(classgetRequest.getId()).get();
+        ClassBoardRes classBoardRes = new ClassBoardRes(classBoard);
+        return classBoardRes;
+    }
+
     //강의게시판 생성
     @Transactional
     public ClassBoardRes writeClass(ClassCreateRequest classCreateRequest){
@@ -113,6 +153,14 @@ public class BoardService {
         return "Success Delete!";
     }
 
+    //강의 파일 보기
+    @Transactional
+    public ClassBoardRes getClassFile(ClassGetRequest classGetFileRequest){
+        ClassBoard classBoard = classBoardRepository.findById(classGetFileRequest.getId()).get();
+        ClassBoardRes classBoardRes = new ClassBoardRes(classBoard);
+        return classBoardRes;
+    }
+
     //강의 파일 업로드
     @Transactional
     public String uploadClassFile(ClassFileRequest classFileRequest){
@@ -126,6 +174,15 @@ public class BoardService {
         deleteClassFileUrl(classFileRequest);
         return "Success Delete!";
     }
+
+    //강의 게시판 댓글 작성
+    @Transactional
+    public ClassCommentRes getClassComments(ClassGetRequest classCommentRequest){
+        ClassComment classComment = classCommentRepository.findById(classCommentRequest.getId()).get();
+        ClassCommentRes classCommentRes = new ClassCommentRes(classComment);
+        return classCommentRes;
+    }
+
 
     //강의 게시판 댓글 작성
     @Transactional
@@ -147,6 +204,14 @@ public class BoardService {
     public String deleteClassComments(ClassDeleteCommentRequest classDeleteCommentRequest){
         changeNullClassComment(classDeleteCommentRequest);
         return "Success Delete!";
+    }
+
+    //강의 게시판 대댓글 보기
+    @Transactional
+    public ClassMiniCommentRes getClassMiniComments(ClassGetMiniCommentRequest classMiniCommentRequest){
+        ClassMiniCommentDto classMiniCommentDto = classMiniCommentRepository.findByClassIdandComAndClassCommentId(classMiniCommentRequest.getClassBoarId(), classMiniCommentRequest.getClassCommentId()).get();
+        ClassMiniCommentRes classMiniCommentRes = new ClassMiniCommentRes(classMiniCommentDto.toEntity());
+        return classMiniCommentRes;
     }
 
 

@@ -31,14 +31,26 @@ public class NoticeDto {
     }
 
     public NoticeDto(Notice notice) {
-        this.userId = notice.getAdminId();
+        this.userId = notice.getUserId();
         this.noticeId = notice.getId();
         this.email = notice.getEmail();
         this.title = notice.getTitle();
         this.createAt = notice.getCreateAt();
         this.updateAt = notice.getUpdateAt();
         this.fileUrl = notice.getFileUrl();
+    }
 
+    public Notice toEntity(){
+        return Notice
+                .builder()
+                .id(noticeId)
+                .userId(userId)
+                .email(email)
+                .title(title)
+                .createAt(createAt)
+                .updateAt(updateAt)
+                .fileUrl(fileUrl)
+                .build();
     }
 
     public void changeFileUrl(String fileUrl){
