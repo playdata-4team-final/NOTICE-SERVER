@@ -22,6 +22,6 @@ public class ClassBoard {
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
     private String fileUrl;
-    private Long lectureUrl;
+    private Long lectureId;
 
 }

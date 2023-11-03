@@ -14,11 +14,13 @@ import java.util.Optional;
 public interface NoticeRepository
         extends JpaRepository<Notice, Long> {
 
-    @Query("DELETE from Notice as a WHERE a.id = :id")
+    @Query("DELETE from Notice as n WHERE n.id = :id")
     void deleteByNoticeId(@Param("id") Long id);
-    @Query("SELECT a from Notice as a WHERE a.id = :id")
-    Optional<NoticeDto> findByNoticeId(@Param("id") Long id);
 
-    @Query("select a from Notice as a where a.adminId = :adminId and a.id = :noticeId")
+
+    @Query("select n from Notice as n where n.userId = :adminId and n.id = :noticeId")
     Optional<NoticeDto> findByAdminIdandNoticeId(@Param("adminId") String adminId, @Param("noticeId")Long noticeId);
+
+    @Query("SELECT n.fileUrl from Notice as n where n.id = :noticeId")
+    Optional<NoticeDto> findFileUrlByNoticeId(@Param("noticeId")Long noticeId);
 }
