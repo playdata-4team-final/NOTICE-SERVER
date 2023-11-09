@@ -14,8 +14,10 @@ public class BoarderService {
     private final AdminBoardRepository adminBoardRepository;
     private final ClassBoardRepository classBoardRepository;
 
-    //댓글 작성
-    private void writeMiniComments(){}
+    //d댓글 작성
+    private void writeMiniComments(){
+
+    }
 
     //파일 업로드
     private void uploadFile(){}
