@@ -1,29 +1,40 @@
 package com.example.notice.board.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Builder
+@AllArgsConstructor
 public class Notice {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
+
     private String userId;
-    @Column(unique = true)
+
     private String email;
+
     private String title;
+
+    @Column(name = "create_at")
     private LocalDateTime createAt;
+
+    @Column(name = "update_at")
     private LocalDateTime updateAt;
-    @Column(columnDefinition = "파일을 올려주세요.")
-    private String fileUrl;
+
+    @Column
+    private String content;
+
+    @OneToMany(mappedBy = "notice")
+    private List<NoticeFile> noticeFiles;
+
 
 
 }

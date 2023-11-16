@@ -1,14 +1,14 @@
 package com.example.notice.board.domain.request;
 
 import com.example.notice.board.domain.entity.ClassMiniComment;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class ClassGetMiniCommentRequest {
     private Long classBoarId;

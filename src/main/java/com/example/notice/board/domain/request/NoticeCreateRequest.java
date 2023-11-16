@@ -1,30 +1,30 @@
 package com.example.notice.board.domain.request;
 
 import com.example.notice.board.domain.entity.Notice;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class NoticeCreateRequest {
-    private Long id;
     private String adminId;
     private String email;
     private String title;
     private LocalDateTime createAt;
+    private String content;
     private String fileUrl;
 
     public Notice toEntity() {
         return Notice.builder()
-                .id(id)
-                .adminId(adminId)
+                .userId(adminId)
                 .email(email)
                 .title(title)
                 .createAt(createAt)
+                .content(content)
                 .updateAt(LocalDateTime.now())
                 .build();
     }

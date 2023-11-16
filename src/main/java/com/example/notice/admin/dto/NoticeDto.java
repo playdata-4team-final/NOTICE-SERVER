@@ -1,11 +1,13 @@
 package com.example.notice.admin.dto;
 
 import com.example.notice.board.domain.entity.Notice;
+import com.example.notice.board.domain.entity.NoticeFile;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,16 +20,16 @@ public class NoticeDto {
     private String title;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
-    private String fileUrl;
+    private List<NoticeFile> noticeFiles;
 
-    public NoticeDto(String userId, Long noticeId, String email, String title, LocalDateTime createAt, LocalDateTime updateAt, String fileUrl) {
+    public NoticeDto(String userId, Long noticeId, String email, String title, LocalDateTime createAt, LocalDateTime updateAt, List<NoticeFile> noticeFiles) {
         this.userId = userId;
         this.noticeId = noticeId;
         this.email = email;
         this.title = title;
         this.createAt = createAt;
         this.updateAt = updateAt;
-        this.fileUrl = fileUrl;
+        this.noticeFiles = noticeFiles;
     }
 
     public NoticeDto(Notice notice) {
@@ -37,7 +39,7 @@ public class NoticeDto {
         this.title = notice.getTitle();
         this.createAt = notice.getCreateAt();
         this.updateAt = notice.getUpdateAt();
-        this.fileUrl = notice.getFileUrl();
+        this.noticeFiles = notice.getNoticeFiles();
     }
 
     public Notice toEntity(){
@@ -49,17 +51,10 @@ public class NoticeDto {
                 .title(title)
                 .createAt(createAt)
                 .updateAt(updateAt)
-                .fileUrl(fileUrl)
+                .noticeFiles(noticeFiles)
                 .build();
     }
 
-    public void changeFileUrl(String fileUrl){
-        this.fileUrl = fileUrl;
-    }
-
-    public void deleteFileUrl(){
-        this.fileUrl = "파일을 올려주세요";
-    }
 
     public void changeUpdateTime(){
         this.updateAt = LocalDateTime.now();

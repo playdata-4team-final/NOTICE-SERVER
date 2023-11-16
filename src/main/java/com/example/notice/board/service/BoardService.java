@@ -5,10 +5,28 @@ import com.example.notice.board.domain.entity.*;
 import com.example.notice.board.domain.request.*;
 import com.example.notice.board.domain.response.*;
 import com.example.notice.board.repository.*;
+import com.example.notice.global.exception.ClientException;
+import com.example.notice.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,11 +39,26 @@ public class BoardService {
     private final ClassMiniCommentRepository classMiniCommentRepository;
     private final NoticeCommentRepository noticeCommentRepository;
     private final ClassCommentRepository classCommentRepository;
+    private final String fileDirectory = "C:/LmsFile";
+
+    @Transactional
+    public List<NoticeRes> getAllNotices(){
+        List<Notice> all = adminBoardRepository.findAll();
+
+        List<NoticeRes> noticeResList = new ArrayList<>();
+
+        for(Notice notice : all) {
+            NoticeRes noticeRes = new NoticeRes(notice);
+            noticeResList.add(noticeRes);
+        }
+        return noticeResList;
+    }
+
 
     //공지사항 보기
     @Transactional
-    public NoticeRes getNotice(NoticeGetRequest noticeGetRequest){
-        Notice notice = adminBoardRepository.findById(noticeGetRequest.getId()).get();
+    public NoticeRes getNotice(Long id){
+        Notice notice = adminBoardRepository.findById(id).get();
         NoticeRes noticeRes = new NoticeRes(notice);
         return  noticeRes;
     }
@@ -40,41 +73,106 @@ public class BoardService {
 
     //공지사항 삭제
     @Transactional
-    public String deleteNotice(NoticeDeleteRequest noticedeleteRequest){
-        Notice notice = adminBoardRepository.findById(noticedeleteRequest.getId()).get();
-        adminBoardRepository.deleteByNoticeId(notice.getId());
+    public String deleteNotice(NoticeDeleteRequest noticeDeleteRequest){
+
+        adminBoardRepository.deleteByIdsQuery(noticeDeleteRequest.getNoticeIds());
+
         return "Success Delete!";
     }
 
-    //공지사항 파일 보기
+    //공지사항 파일 다운
     @Transactional
-    public NoticeRes getNoticeFile(NoticeGetRequest noticeFileRequest){
-        NoticeDto noticeDto = adminBoardRepository.findFileUrlByNoticeId(noticeFileRequest.getId()).get();
-        NoticeRes noticeRes = new NoticeRes(noticeDto.toEntity());
-        return noticeRes;
+    public FileSystemResource downloadNoticeFile(NoticeFileRequest request) {
+        try {
+            String fileName = request.getFileName();
+            Path filePath = Paths.get(fileDirectory, fileName);
+            File file = filePath.toFile();
+
+            if (file.exists()) {
+                HttpHeaders headers = new HttpHeaders();
+                headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+                headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
+                FileSystemResource response = new FileSystemResource(file);
+
+                return response;
+            } else {
+                throw new NotFoundException("파일이 없습니다.");
+            }
+        } catch (Exception e) {
+            throw new ClientException("클라이언트 오류");
+        }
+    }
+
+    //공지사항 파일 가져오기
+    public List<String> getNoticeFile(NoticeFileRequest request){
+
+        // 공지사항 파일 가져오기 로직을 활용하여 파일 목록 가져오기
+        List<String> allFiles = getNoticeFiles();
+
+        // noticeId가  파일 필터링
+        List<String> filteredFiles = allFiles.stream()
+                .filter(fileName -> fileName.contains("_" + request.getNoticeId() + "_"))
+                .collect(Collectors.toList());
+
+        return filteredFiles;
     }
 
 
     //공지사항 파일 업로드
     @Transactional
-    public String uploadNoticeFile(NoticeFileRequest noticeFileRequest){
-        changeNoticeFileUrl(noticeFileRequest);
-        return "Success Upload!";
+    public String uploadNoticeFile(NoticeFileRequest request) {
+        try {
+            // 저장할 디렉토리 생성
+            Files.createDirectories(Path.of(fileDirectory));
+
+            // 파일 경로에 noticeId를 포함시킴
+            String fileName = generateNoticeFileName(request);
+            Path filePath = Path.of(fileDirectory, fileName);
+
+            // 파일 저장
+            Files.copy(request.getFile().getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            return "File uploaded Success!";
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload file: " + e.getMessage(), e);
+        }
     }
 
-    //공지사항 파일 삭제
+    // 공지사항 파일 삭제
     @Transactional
-    public String deleteNoticeFile(NoticeFileRequest noticeFileRequest){
-        deleteNoticeFileUrl(noticeFileRequest);
-        return "Success Delete!";
+    public boolean deleteNoticeFile(NoticeFileRequest request) {
+        try {
+            // 파일명 생성
+            String fileName = generateNoticeFileName(request);
+
+            // 파일 경로 생성
+            Path filePath = Path.of(fileDirectory, fileName);
+
+            // 파일 삭제
+            boolean isDeleted = Files.deleteIfExists(filePath);
+
+            if (isDeleted) {
+                return true;
+            } else {
+                throw new ClientException("잘못된 파일명입니다:" + fileName);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting file: " + e.getMessage(), e);
+        }
     }
 
     //공지사항 댓글 보기
     @Transactional
-    public NoticeCommentRes getNoticeComments(NoticeGetRequest noticeCommentRequest){
-        NoticeCommentDto noticeCommentDto = noticeCommentRepository.findByNoticeId(noticeCommentRequest.getId()).get();
-        NoticeCommentRes noticeCommentRes = new NoticeCommentRes(noticeCommentDto.toEntity());
-        return noticeCommentRes;
+    public List<NoticeCommentRes> getNoticeComments(Long id){
+        List<NoticeCommentDto> all = noticeCommentRepository.findByNoticeId(id);
+        List<NoticeCommentRes> noticeCommentResList = new ArrayList<>();
+
+        for(NoticeCommentDto noticeComment : all) {
+            NoticeCommentRes noticeCommentRes = new NoticeCommentRes(noticeComment.toEntity());
+            noticeCommentResList.add(noticeCommentRes);
+        }
+        return noticeCommentResList;
     }
 
     //공지사항 댓글 작성
@@ -102,7 +200,7 @@ public class BoardService {
     //공지 사항 대댓글 보기
     @Transactional
     public NoticeMiniCommentRes getNoticeMiniComments(NoticeGetMiniCommentRequest noticeGetMiniCommentRequest){
-        NoticeMiniCommentDto noticeMiniCommentDto = noticeMiniCommentRepository.findByNoticeIdandComAndNoticeCommentId(noticeGetMiniCommentRequest.getNoticeId(), noticeGetMiniCommentRequest.getCommentId()).get();
+        NoticeMiniCommentDto noticeMiniCommentDto = noticeMiniCommentRepository.findByNoticeIdComAndNoticeCommentId(noticeGetMiniCommentRequest.getNoticeId(), noticeGetMiniCommentRequest.getCommentId()).get();
         NoticeMiniCommentRes noticeMiniCommentRes = new NoticeMiniCommentRes(noticeMiniCommentDto.toEntity());
         return noticeMiniCommentRes;
     }
@@ -147,32 +245,90 @@ public class BoardService {
 
     //강의 게시판 삭제
     @Transactional
-    public String deleteClass(ClassDeleteRequest classdeleteRequest){
-        CLassDto cLassDto = classBoardRepository.findByClassId(classdeleteRequest.getId()).get();
-        adminBoardRepository.deleteByNoticeId(cLassDto.getClassId());
+    public String deleteClass(ClassDeleteRequest classdeleteRequest){;
+        classBoardRepository.deleteById(classdeleteRequest.getId());
         return "Success Delete!";
     }
 
-    //강의 파일 보기
+
+    //강의 파일 다운
     @Transactional
-    public ClassBoardRes getClassFile(ClassGetRequest classGetFileRequest){
-        ClassBoard classBoard = classBoardRepository.findById(classGetFileRequest.getId()).get();
-        ClassBoardRes classBoardRes = new ClassBoardRes(classBoard);
-        return classBoardRes;
+    public FileSystemResource downloadClassFile(ClassFileRequest classFileRequest) {
+        try {
+            String fileName = classFileRequest.getFileName();
+            Path filePath = Paths.get(fileDirectory, fileName);
+            File file = filePath.toFile();
+
+            if (file.exists()) {
+                HttpHeaders headers = new HttpHeaders();
+                headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+                headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
+                FileSystemResource response = new FileSystemResource(file);
+
+                return response;
+            } else {
+                throw new NotFoundException("파일이 없습니다.");
+            }
+        } catch (Exception e) {
+            throw new ClientException("클라이언트 오류");
+        }
     }
+
+    //강의 파일 가져오기
+    public List<String> getClassFile(ClassFileRequest request){
+
+        // 공지사항 파일 가져오기 로직을 활용하여 파일 목록 가져오기
+        List<String> allFiles = getNoticeFiles();
+
+        // noticeId가  파일 필터링
+        List<String> filteredFiles = allFiles.stream()
+                .filter(fileName -> fileName.contains("_" + request.getClassId() + "_"))
+                .collect(Collectors.toList());
+
+        return filteredFiles;
+    }
+
 
     //강의 파일 업로드
-    @Transactional
-    public String uploadClassFile(ClassFileRequest classFileRequest){
-        changeClassFileUrl(classFileRequest);
-        return "Success Upload!";
+    public String uploadClassFile(ClassFileRequest request) {
+        try {
+            // 저장할 디렉토리 생성
+            Files.createDirectories(Path.of(fileDirectory));
+
+            // 파일 경로에 noticeId를 포함시킴
+            String fileName = generateClassFileName(request);
+            Path filePath = Path.of(fileDirectory, fileName);
+
+            // 파일 저장
+            Files.copy(request.getFile().getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            return "File uploaded Success!";
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload file: " + e.getMessage(), e);
+        }
     }
 
-    //강의 파일 삭제
-    @Transactional
-    public String deleteClassFile(ClassFileRequest classFileRequest){
-        deleteClassFileUrl(classFileRequest);
-        return "Success Delete!";
+    // 강의 파일 삭제
+    public boolean deleteClassFile(ClassFileRequest request) {
+        try {
+            // 파일명 생성
+            String fileName = generateClassFileName(request);
+
+            // 파일 경로 생성
+            Path filePath = Path.of(fileDirectory, fileName);
+
+            // 파일 삭제
+            boolean isDeleted = Files.deleteIfExists(filePath);
+
+            if (isDeleted) {
+                return true;
+            } else {
+                throw new ClientException("잘못된 파일명입니다:" + fileName);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting file: " + e.getMessage(), e);
+        }
     }
 
     //강의 게시판 댓글 작성
@@ -209,7 +365,7 @@ public class BoardService {
     //강의 게시판 대댓글 보기
     @Transactional
     public ClassMiniCommentRes getClassMiniComments(ClassGetMiniCommentRequest classMiniCommentRequest){
-        ClassMiniCommentDto classMiniCommentDto = classMiniCommentRepository.findByClassIdandComAndClassCommentId(classMiniCommentRequest.getClassBoarId(), classMiniCommentRequest.getClassCommentId()).get();
+        ClassMiniCommentDto classMiniCommentDto = classMiniCommentRepository.findByClassIdComAndClassCommentId(classMiniCommentRequest.getClassBoarId(), classMiniCommentRequest.getClassCommentId()).get();
         ClassMiniCommentRes classMiniCommentRes = new ClassMiniCommentRes(classMiniCommentDto.toEntity());
         return classMiniCommentRes;
     }
@@ -239,34 +395,6 @@ public class BoardService {
 
 
 
-
-    @Transactional
-    public int changeNoticeFileUrl(NoticeFileRequest noticeFileRequest){
-        try {
-            NoticeDto noticeDto = adminBoardRepository.findByAdminIdandNoticeId(noticeFileRequest.getAdminId(), noticeFileRequest.getNoticeId()).get();
-
-            noticeDto.changeFileUrl(noticeFileRequest.getFileUrl());
-            noticeDto.changeUpdateTime();
-            return 1;
-        }
-        catch (Exception e){
-            return 0;
-        }
-    }
-
-    @Transactional
-    public int deleteNoticeFileUrl(NoticeFileRequest noticeFileRequest){
-        try {
-            NoticeDto noticeDto = adminBoardRepository.findByAdminIdandNoticeId(noticeFileRequest.getAdminId(), noticeFileRequest.getNoticeId()).get();
-            noticeDto.deleteFileUrl();
-            noticeDto.changeUpdateTime();
-            return 1;
-        }
-        catch (Exception e){
-            return 0;
-        }
-    }
-
     @Transactional
     public int changeNoticeComment(NoticeUpdateCommentRequest noticeUpdateCommentRequest){
         NoticeComment noticeComment = noticeCommentRepository.findById(noticeUpdateCommentRequest.getNoticeId()).get();
@@ -277,7 +405,7 @@ public class BoardService {
 
     @Transactional
     public int changeNullNoticeComment(NoticeDeleteCommentRequest noticeDeleteCommentRequest){
-        NoticeComment noticeComment = noticeCommentRepository.findById(noticeDeleteCommentRequest.getId()).get();
+        NoticeComment noticeComment = noticeCommentRepository.findByUserId(noticeDeleteCommentRequest.getId(),noticeDeleteCommentRequest.getUserId()).get();
         noticeComment.deleteNoticeComment();
         return 1;
     }
@@ -298,31 +426,7 @@ public class BoardService {
     }
 
 
-    @Transactional
-    public int deleteClassFileUrl(ClassFileRequest classFileRequest){
-        try {
-            CLassDto cLassDto = classBoardRepository.findByUserIdandClassId(classFileRequest.getAdminId(), classFileRequest.getNoticeId()).get();
-            cLassDto.deleteFileUrl();
-            cLassDto.changeUpdateTime();
-            return 1;
-        }
-        catch (Exception e){
-            return 0;
-        }
-    }
 
-    @Transactional
-    public int changeClassFileUrl(ClassFileRequest classFileRequest){
-        try {
-            CLassDto cLassDto = classBoardRepository.findByUserIdandClassId(classFileRequest.getAdminId(), classFileRequest.getNoticeId()).get();
-            cLassDto.changeFileUrl(classFileRequest.getFileUrl());
-            cLassDto.changeUpdateTime();
-            return 1;
-        }
-        catch (Exception e){
-            return 0;
-        }
-    }
 
     @Transactional
     public int changeClassComment(ClassUpdateCommentRequest classUpdateCommentRequest ){
@@ -353,4 +457,33 @@ public class BoardService {
         classMiniComment.deleteClassMiniComment();
         return 1;
     }
+
+
+    private String generateClassFileName(ClassFileRequest request) {
+        // 파일명 규칙: classId_originalFilename
+        return String.format("%02d_%s",
+                request.getClassId(),
+                request.getFileName());
+    }
+
+    private String generateNoticeFileName(NoticeFileRequest request) {
+        // 파일명 규칙: noticeId_originalFilename
+        return String.format("%02d_%s",
+                request.getNoticeId(),
+                request.getFileName());
+    }
+
+    private List<String> getNoticeFiles(){
+        File directory = new File(fileDirectory);
+        File[] files = directory.listFiles();
+
+        if (files != null) {
+            return Arrays.stream(files)
+                    .map(File::getName)
+                    .collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
 }

@@ -1,22 +1,23 @@
 package com.example.notice.board.domain.request;
 
 import com.example.notice.board.domain.entity.Notice;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class NoticeDeleteRequest {
-    private Long id;
-    private String adminId;
-    public Notice toEntity() {
-        return Notice.builder()
-                .id(id)
-                .userId(adminId)
-                .build();
+    private List<Long> noticeIds;
+    public List<Notice> toEntity() {
+        return noticeIds.stream()
+                .map(id -> Notice.builder().id(id).build())
+                .collect(Collectors.toList());
     }
+
 }

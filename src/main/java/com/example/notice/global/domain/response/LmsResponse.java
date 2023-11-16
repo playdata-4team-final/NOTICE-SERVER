@@ -26,6 +26,4 @@ public class LmsResponse<T> {
         this.errorMsg= errorMsg;
         this.currentTime = currentTime;
     }
-
-
 }

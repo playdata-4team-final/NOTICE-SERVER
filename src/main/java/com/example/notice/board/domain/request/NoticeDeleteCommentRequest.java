@@ -1,12 +1,12 @@
 package com.example.notice.board.domain.request;
 
 import com.example.notice.board.domain.entity.NoticeComment;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class NoticeDeleteCommentRequest {
     private Long id;
@@ -18,6 +18,7 @@ public class NoticeDeleteCommentRequest {
                .builder()
                .id(id)
                .userId(userId)
+               .userEmail("비공개")
                .adminBoardId(adminBoarId)
                .build();
     }

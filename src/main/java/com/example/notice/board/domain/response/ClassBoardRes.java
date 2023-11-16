@@ -1,10 +1,12 @@
 package com.example.notice.board.domain.response;
 
 import com.example.notice.board.domain.entity.ClassBoard;
+import com.example.notice.board.domain.entity.ClassFile;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,7 +18,7 @@ public class ClassBoardRes {
     private String title;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
-    private String fileUrl;
+    private List<ClassFile> classFiles;
     private Long lectureId;
 
     public ClassBoardRes(ClassBoard classBoard) {
@@ -26,7 +28,7 @@ public class ClassBoardRes {
         this.title = classBoard.getTitle();
         this.createAt = classBoard.getCreateAt();
         this.updateAt = classBoard.getUpdateAt();
-        this.fileUrl = classBoard.getFileUrl();
+        this.classFiles = classBoard.getClassFiles();
         this.lectureId = classBoard.getLectureId();
     }
 }

@@ -1,16 +1,15 @@
 package com.example.notice.board.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Builder
+@AllArgsConstructor
 public class NoticeMiniComment {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

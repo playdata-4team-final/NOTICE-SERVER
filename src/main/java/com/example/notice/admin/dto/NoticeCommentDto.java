@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public class NoticeCommentDto {
     private Long id;
-    private String userId;
+    private String userEmail;
     private String comments;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
@@ -15,16 +15,16 @@ public class NoticeCommentDto {
 
     public NoticeCommentDto(NoticeComment noticeComment) {
         this.id = noticeComment.getId();
-        this.userId = noticeComment.getUserId();
+        this.userEmail = noticeComment.getUserEmail();
         this.comments = noticeComment.getComments();
         this.createAt = noticeComment.getCreateAt();
         this.updateAt = noticeComment.getUpdateAt();
         this.adminBoardId = noticeComment.getAdminBoardId();
     }
 
-    public NoticeCommentDto(Long id, String userId, String comments, LocalDateTime createAt, LocalDateTime updateAt, Long adminBoardId) {
+    public NoticeCommentDto(Long id, String userEmail, String comments, LocalDateTime createAt, LocalDateTime updateAt, Long adminBoardId) {
         this.id = id;
-        this.userId = userId;
+        this.userEmail = userEmail;
         this.comments = comments;
         this.createAt = createAt;
         this.updateAt = updateAt;
@@ -35,7 +35,7 @@ public class NoticeCommentDto {
         return NoticeComment
                 .builder()
                 .id(id)
-                .userId(userId)
+                .userEmail(userEmail)
                 .comments(comments)
                 .createAt(createAt)
                 .updateAt(updateAt)

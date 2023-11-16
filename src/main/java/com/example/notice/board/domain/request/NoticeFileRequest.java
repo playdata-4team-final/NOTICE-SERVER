@@ -1,15 +1,16 @@
 package com.example.notice.board.domain.request;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class NoticeFileRequest {
 
     private String adminId;
     private Long noticeId;
-    private String fileUrl;
+    private String fileName;
+    private MultipartFile file;
 }
